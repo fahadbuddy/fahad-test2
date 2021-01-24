@@ -39,6 +39,14 @@ public class TestDataHelper {
         return dataEnvelope;
     }
 
+    public static DataEnvelope createTestInvalidCheckSumDataEnvelopeApiObject() {
+        DataBody dataBody = new DataBody(DUMMY_DATA, "12345");
+        DataHeader dataHeader = new DataHeader(TEST_NAME, BlockTypeEnum.BLOCKTYPEA);
+
+        DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);
+        return dataEnvelope;
+    }
+
     public static DataEnvelope createTestDataEnvelopeApiObjectWithEmptyName() {
         DataBody dataBody = new DataBody(DUMMY_DATA, DUMMY_DATA_CHECKSUM);
         DataHeader dataHeader = new DataHeader(TEST_NAME_EMPTY, BlockTypeEnum.BLOCKTYPEA);

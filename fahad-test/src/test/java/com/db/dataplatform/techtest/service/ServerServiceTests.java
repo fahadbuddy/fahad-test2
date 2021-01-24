@@ -18,7 +18,12 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 import static com.db.dataplatform.techtest.TestDataHelper.createTestDataEnvelopeApiObject;
+import static com.db.dataplatform.techtest.TestDataHelper.createTestInvalidCheckSumDataEnvelopeApiObject;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ServerServiceTests {
@@ -47,10 +52,22 @@ public class ServerServiceTests {
 
     @Test
     public void shouldSaveDataEnvelopeAsExpected() throws NoSuchAlgorithmException, IOException {
+        // Given/When
         boolean success = server.saveDataEnvelope(testDataEnvelope);
 
+        // Then
         assertThat(success).isTrue();
-        //verify(dataBodyServiceImplMock, times(1)).saveDataBody(eq(expectedDataBodyEntity));
+        verify(dataBodyServiceImplMock, times(1)).saveDataBody(eq(expectedDataBodyEntity));
+    }
+
+    @Test
+    public void shouldNotSaveDataEnvelopeIfCheckSumNotMatched() throws NoSuchAlgorithmException, IOException {
+        // Given/When
+        boolean success = server.saveDataEnvelope(createTestInvalidCheckSumDataEnvelopeApiObject());
+
+        // Then
+        assertThat(success).isFalse();
+        verify(dataBodyServiceImplMock, times(0)).saveDataBody(any());
     }
 
 
