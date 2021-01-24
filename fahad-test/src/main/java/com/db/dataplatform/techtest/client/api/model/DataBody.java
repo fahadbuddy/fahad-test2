@@ -16,4 +16,8 @@ public class DataBody {
     @NotNull
     private String dataBody;
 
+    @NotNull
+    private String checksum;
+
+
 }

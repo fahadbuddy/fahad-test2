@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.db.dataplatform.techtest.TestDataHelper.DUMMY_DATA;
+import static com.db.dataplatform.techtest.TestDataHelper.DUMMY_DATA_CHECKSUM;
 import static com.db.dataplatform.techtest.TestDataHelper.TEST_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +19,7 @@ public class DataEnvelopeTests {
     @Test
     public void assignDataHeaderFieldsShouldWorkAsExpected() {
         DataHeader dataHeader = new DataHeader(TEST_NAME, BlockTypeEnum.BLOCKTYPEA);
-        DataBody dataBody = new DataBody(DUMMY_DATA);
+        DataBody dataBody = new DataBody(DUMMY_DATA, DUMMY_DATA_CHECKSUM);
 
         DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);
 

@@ -1,6 +1,7 @@
 package com.db.dataplatform.techtest.server.persistence.model;
 
 import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +24,7 @@ import java.time.Instant;
 )
 @Setter
 @Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class DataHeaderEntity {
 
     @Id
@@ -31,9 +33,11 @@ public class DataHeaderEntity {
     @Column(name = "DATA_HEADER_ID")
     private Long dataHeaderId;
 
+    @EqualsAndHashCode.Include
     @Column(name = "NAME")
     private String name;
 
+    @EqualsAndHashCode.Include
     @Column(name = "BLOCKTYPE")
     @Enumerated(EnumType.STRING)
     private BlockTypeEnum blocktype;
