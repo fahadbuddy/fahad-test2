@@ -1,5 +1,7 @@
 package com.db.dataplatform.techtest.service;
 
+import com.db.dataplatform.techtest.TestDataHelper;
+import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
 import com.db.dataplatform.techtest.server.persistence.model.DataBodyEntity;
 import com.db.dataplatform.techtest.server.persistence.model.DataHeaderEntity;
 import com.db.dataplatform.techtest.server.persistence.repository.DataStoreRepository;
@@ -32,7 +34,8 @@ public class DataBodyServiceTests {
 
     @Before
     public void setup() {
-        DataHeaderEntity testDataHeaderEntity = createTestDataHeaderEntity(Instant.now());
+        DataHeaderEntity testDataHeaderEntity = createTestDataHeaderEntity(Instant.now(), BlockTypeEnum.BLOCKTYPEA,
+                                                                           TestDataHelper.TEST_NAME);
         expectedDataBodyEntity = createTestDataBodyEntity(testDataHeaderEntity);
 
         dataBodyService = new DataBodyServiceImpl(dataStoreRepositoryMock);
@@ -40,6 +43,17 @@ public class DataBodyServiceTests {
 
     @Test
     public void shouldSaveDataBodyEntityAsExpected(){
+        dataBodyService.saveDataBody(expectedDataBodyEntity);
+
+        verify(dataStoreRepositoryMock, times(1))
+                .save(eq(expectedDataBodyEntity));
+    }
+
+    @Test
+    public void canGetAllDataBodyEntitiesForAGivenBlockType(){
+        // Given
+
+
         dataBodyService.saveDataBody(expectedDataBodyEntity);
 
         verify(dataStoreRepositoryMock, times(1))

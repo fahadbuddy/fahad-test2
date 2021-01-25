@@ -1,5 +1,7 @@
 package com.db.dataplatform.techtest.service;
 
+import com.db.dataplatform.techtest.TestDataHelper;
+import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
 import com.db.dataplatform.techtest.server.persistence.model.DataHeaderEntity;
 import com.db.dataplatform.techtest.server.persistence.repository.DataHeaderRepository;
 import com.db.dataplatform.techtest.server.service.DataHeaderService;
@@ -28,7 +30,8 @@ public class DataHeaderServiceTests {
 
     @Before
     public void setup() {
-        expectedDataHeaderEntity = createTestDataHeaderEntity(Instant.now());
+        expectedDataHeaderEntity = createTestDataHeaderEntity(Instant.now(), BlockTypeEnum.BLOCKTYPEA,
+                                                              TestDataHelper.TEST_NAME);
 
         dataHeaderService = new DataHeaderServiceImpl(dataHeaderRepositoryMock);
     }

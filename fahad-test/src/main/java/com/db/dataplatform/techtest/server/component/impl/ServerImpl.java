@@ -1,7 +1,9 @@
 package com.db.dataplatform.techtest.server.component.impl;
 
+import com.db.dataplatform.techtest.server.api.model.DataBody;
 import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.server.component.Server;
+import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
 import com.db.dataplatform.techtest.server.persistence.model.DataBodyEntity;
 import com.db.dataplatform.techtest.server.persistence.model.DataHeaderEntity;
 import com.db.dataplatform.techtest.server.service.DataBodyService;
@@ -10,6 +12,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyList;
 
 @Slf4j
 @Service
@@ -41,6 +48,15 @@ public class ServerImpl implements Server {
     log.info("Data persisted successfully, data name: {}", envelope.getDataHeader()
                                                                    .getName());
     return true;
+  }
+
+  @Override
+  public List<DataBody> getAllDataForBlockType(final BlockTypeEnum blockType) {
+    if (blockType != null){
+      return dataBodyServiceImpl.getDataByBlockType(blockType).stream().map(e -> modelMapper.map(e, DataBody.class)).collect(
+              Collectors.toList());
+    }
+    return emptyList();
   }
 
   private void persist(DataEnvelope envelope) {

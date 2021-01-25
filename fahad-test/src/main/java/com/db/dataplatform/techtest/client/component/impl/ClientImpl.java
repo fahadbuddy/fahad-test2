@@ -28,8 +28,14 @@ import static java.util.Collections.singletonList;
 @EnableRetry
 public class ClientImpl implements Client {
 
-    @Autowired
+
     RestTemplate restTemplate;
+
+    @Autowired
+    public ClientImpl(final RestTemplate restTemplate) {
+
+        this.restTemplate = restTemplate;
+    }
 
     @Override
     public void pushData(@Valid DataEnvelope dataEnvelope) {

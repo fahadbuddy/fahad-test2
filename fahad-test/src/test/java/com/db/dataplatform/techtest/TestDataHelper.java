@@ -15,11 +15,13 @@ public class TestDataHelper {
     public static final String TEST_NAME_EMPTY = "";
     public static final String DUMMY_DATA = "AKCp5fU4WNWKBVvhXsbNhqk33tawri9iJUkA5o4A6YqpwvAoYjajVw8xdEw6r9796h1wEp29D";
     public static final String DUMMY_DATA_CHECKSUM = "cecfd3953783df706878aaec2c22aa70";
+    public static final String TEST_NAME_2 = "Test2";
 
-    public static DataHeaderEntity createTestDataHeaderEntity(Instant expectedTimestamp) {
+    public static DataHeaderEntity createTestDataHeaderEntity(Instant expectedTimestamp, final BlockTypeEnum blockType,
+                                                              final String testName) {
         DataHeaderEntity dataHeaderEntity = new DataHeaderEntity();
-        dataHeaderEntity.setName(TEST_NAME);
-        dataHeaderEntity.setBlocktype(BlockTypeEnum.BLOCKTYPEA);
+        dataHeaderEntity.setName(testName);
+        dataHeaderEntity.setBlockType(blockType);
         dataHeaderEntity.setCreatedTimestamp(expectedTimestamp);
         return dataHeaderEntity;
     }
