@@ -2,7 +2,6 @@ package com.db.dataplatform.techtest.client.component.impl;
 
 import com.db.dataplatform.techtest.client.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.client.component.Client;
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 import static com.db.dataplatform.techtest.Constant.URI_GETDATA;
 import static com.db.dataplatform.techtest.Constant.URI_PUSHDATA;
@@ -52,17 +52,17 @@ public class ClientImpl implements Client {
     }
 
     @Override
-    public List<DataEnvelope> getData(String blockType) {
+    public Optional<List<DataEnvelope>> getData(String blockType) {
         log.info("Query for data with header block type {}", blockType);
 
         ResponseEntity<DataEnvelope[]> responseEntity = restTemplate.getForEntity(URI_GETDATA.expand(blockType),
                                                                              DataEnvelope[].class);
 
         if (responseEntity.hasBody()) {
-            return asList(responseEntity.getBody());
+            return Optional.of(asList(responseEntity.getBody()));
         }
 
-        return null;
+        return Optional.empty();
     }
 
     @Override

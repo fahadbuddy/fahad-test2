@@ -7,10 +7,12 @@ import org.springframework.retry.annotation.Retryable;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Optional;
 
 public interface Client {
     @Retryable
     void pushData(DataEnvelope dataEnvelope) throws JsonProcessingException;
-    List<DataEnvelope> getData(String blockType);
+    // Use Optional on return values, to avoid doing null checks.
+    Optional<List<DataEnvelope>> getData(String blockType);
     boolean updateData(String blockName, String newBlockType) throws UnsupportedEncodingException;
 }

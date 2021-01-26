@@ -16,6 +16,7 @@ import org.springframework.retry.annotation.EnableRetry;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Optional;
 
 import static com.db.dataplatform.techtest.Constant.DUMMY_DATA;
 
@@ -49,7 +50,8 @@ public class TechTestApplication {
 
 	private void queryData() {
 
-		List<DataEnvelope> data = client.getData(BlockTypeEnum.BLOCKTYPEA.name());
+		Optional<List<DataEnvelope>> data = client.getData(BlockTypeEnum.BLOCKTYPEA.name());
+
 	}
 
 	private void pushData() throws JsonProcessingException {

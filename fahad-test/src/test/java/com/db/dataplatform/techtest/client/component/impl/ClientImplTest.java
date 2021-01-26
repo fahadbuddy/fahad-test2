@@ -19,6 +19,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.db.dataplatform.techtest.Constant.URI_GETDATA;
 import static com.db.dataplatform.techtest.Constant.URI_PUSHDATA;
@@ -110,16 +111,6 @@ class ClientImplTest {
     mockServer.verify();
   }
 
-  @Test
-  void canGetDataFromServer() {
-
-    String expectedUri = "/hotels/42";
-    String body = "{ \"id\" : \"42\", \"name\" : \"Holiday Inn\"}";
-    mockServer.expect(once(), requestTo(expectedUri))
-              .andExpect(method(HttpMethod.GET))
-              .andRespond(withSuccess(body, MediaType.APPLICATION_JSON));
-
-  }
 
   @Test
   void canGetDataByBlockTypeFromServer() throws JsonProcessingException {
@@ -135,12 +126,13 @@ class ClientImplTest {
                       MediaType.APPLICATION_JSON));
 
     // When
-    List<DataEnvelope> actual = clientImpl.getData(BlockTypeEnum.BLOCKTYPEA.name());
+    Optional<List<DataEnvelope>> actual = clientImpl.getData(BlockTypeEnum.BLOCKTYPEA.name());
 
 
     // Then
     mockServer.verify();
-    assertThat(actual).containsOnly(expectedBody);
+    assertThat(actual).isPresent();
+    assertThat(actual.get()).containsOnly(expectedBody);
   }
 
 }
