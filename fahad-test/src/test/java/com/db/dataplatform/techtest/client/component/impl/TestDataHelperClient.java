@@ -6,6 +6,11 @@ import com.db.dataplatform.techtest.client.api.model.DataBody;
 import com.db.dataplatform.techtest.client.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.client.api.model.DataHeader;
 
+/**
+ * Created separate TestDataHelperClient to decouple the client's Data* classes from server's
+ * Ideally client should be separated in a different maven module, but due to the brevity of
+ * the excercise - this may suffice.
+ */
 public class TestDataHelperClient {
 
     public static final String TEST_NAME = "Test";

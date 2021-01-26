@@ -1,9 +1,9 @@
 package com.db.dataplatform.techtest.client.component.impl;
 
+import com.db.dataplatform.techtest.client.api.model.BlockTypeEnum;
 import com.db.dataplatform.techtest.client.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.client.component.Client;
 import com.db.dataplatform.techtest.client.config.RestTemplateConfiguration;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,11 +18,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
-import static com.db.dataplatform.techtest.Constant.URI_PUSHDATA;
+import java.util.List;
 
+import static com.db.dataplatform.techtest.Constant.URI_GETDATA;
+import static com.db.dataplatform.techtest.Constant.URI_PUSHDATA;
 import static com.db.dataplatform.techtest.client.component.impl.TestDataHelperClient.createInvalidTestDataEnvelopeApiObject;
 import static com.db.dataplatform.techtest.client.component.impl.TestDataHelperClient.createTestDataEnvelopeApiObject;
-
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -35,13 +38,10 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 class ClientImplTest {
 
   @Autowired
-  private RestTemplate restTemplate;
-
-  private ObjectMapper mapper;
-
-  @Autowired
   Client clientImpl;
-
+  @Autowired
+  private RestTemplate restTemplate;
+  private ObjectMapper mapper;
   private MockRestServiceServer mockServer;
 
   @BeforeEach
@@ -62,9 +62,8 @@ class ClientImplTest {
 
     mockServer.expect(once(), requestTo(expectedUri))
               .andExpect(method(HttpMethod.POST))
-              .andRespond(withStatus(HttpStatus.OK)
-              .contentType(MediaType.APPLICATION_JSON)
-              .body(mapper.writeValueAsString(expectedBody)));
+              .andRespond(withStatus(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
+                                                   .body(mapper.writeValueAsString(expectedBody)));
 
     // When
     clientImpl.pushData(expectedBody);
@@ -101,9 +100,8 @@ class ClientImplTest {
     // second try succeeds
     mockServer.expect(once(), requestTo(expectedUri))
               .andExpect(method(HttpMethod.POST))
-              .andRespond(withStatus(HttpStatus.OK)
-                                  .contentType(MediaType.APPLICATION_JSON)
-                                  .body(mapper.writeValueAsString(expectedBody)));
+              .andRespond(withStatus(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
+                                                   .body(mapper.writeValueAsString(expectedBody)));
 
     // When
     clientImpl.pushData(expectedBody);
@@ -121,6 +119,28 @@ class ClientImplTest {
               .andExpect(method(HttpMethod.GET))
               .andRespond(withSuccess(body, MediaType.APPLICATION_JSON));
 
+  }
+
+  @Test
+  void canGetDataByBlockTypeFromServer() throws JsonProcessingException {
+
+    // Given
+
+    DataEnvelope expectedBody = createTestDataEnvelopeApiObject();
+    String expectedJsonDataEnvelopeList = mapper.writeValueAsString(asList(expectedBody));
+
+    mockServer.expect(once(), requestTo(URI_GETDATA.expand(BlockTypeEnum.BLOCKTYPEA)))
+              .andExpect(method(HttpMethod.GET))
+              .andRespond(withSuccess(expectedJsonDataEnvelopeList, MediaType.APPLICATION_JSON).contentType(
+                      MediaType.APPLICATION_JSON));
+
+    // When
+    List<DataEnvelope> actual = clientImpl.getData(BlockTypeEnum.BLOCKTYPEA.name());
+
+
+    // Then
+    mockServer.verify();
+    assertThat(actual).containsOnly(expectedBody);
   }
 
 }
