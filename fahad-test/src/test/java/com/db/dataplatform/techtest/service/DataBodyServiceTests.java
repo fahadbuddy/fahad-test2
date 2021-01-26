@@ -14,12 +14,16 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.Instant;
+import java.util.List;
 
 import static com.db.dataplatform.techtest.TestDataHelper.createTestDataBodyEntity;
 import static com.db.dataplatform.techtest.TestDataHelper.createTestDataHeaderEntity;
+import static java.util.Arrays.asList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DataBodyServiceTests {
@@ -43,8 +47,10 @@ public class DataBodyServiceTests {
 
     @Test
     public void shouldSaveDataBodyEntityAsExpected(){
+        // Given / When
         dataBodyService.saveDataBody(expectedDataBodyEntity);
 
+        // Then
         verify(dataStoreRepositoryMock, times(1))
                 .save(eq(expectedDataBodyEntity));
     }
@@ -52,12 +58,13 @@ public class DataBodyServiceTests {
     @Test
     public void canGetAllDataBodyEntitiesForAGivenBlockType(){
         // Given
+        when(dataStoreRepositoryMock.findByDataHeaderEntityBlockType(any())).thenReturn(asList(expectedDataBodyEntity));
 
+        // When
+        dataBodyService.getDataByBlockType(BlockTypeEnum.BLOCKTYPEA);
 
-        dataBodyService.saveDataBody(expectedDataBodyEntity);
-
-        verify(dataStoreRepositoryMock, times(1))
-                .save(eq(expectedDataBodyEntity));
+        // Then
+        verify(dataStoreRepositoryMock, times(1)).findByDataHeaderEntityBlockType(BlockTypeEnum.BLOCKTYPEA);
     }
 
 }

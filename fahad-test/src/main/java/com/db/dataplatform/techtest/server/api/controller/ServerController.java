@@ -1,6 +1,5 @@
 package com.db.dataplatform.techtest.server.api.controller;
 
-import com.db.dataplatform.techtest.server.api.model.DataBody;
 import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.server.component.Server;
 import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
@@ -41,11 +40,11 @@ public class ServerController {
     }
 
     @GetMapping(value = "/data/{blockType}",  produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<DataBody>> getAllDataForBlockType(@Valid @PathVariable("blockType") BlockTypeEnum blockType) throws IOException, NoSuchAlgorithmException {
+    public ResponseEntity<List<DataEnvelope>> getAllDataForBlockType(@Valid @PathVariable("blockType") BlockTypeEnum blockType) throws IOException, NoSuchAlgorithmException {
 
         log.info("BlockType received: {}", blockType);
 
-        List<DataBody> allDataForBlockType = server.getAllDataForBlockType(blockType);
+        List<DataEnvelope> allDataForBlockType = server.getAllDataForBlockType(blockType);
 
         log.info("BlockType queried results: {}", allDataForBlockType.size());
 

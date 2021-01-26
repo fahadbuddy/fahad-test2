@@ -2,6 +2,7 @@ package com.db.dataplatform.techtest.server.component.impl;
 
 import com.db.dataplatform.techtest.server.api.model.DataBody;
 import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
+import com.db.dataplatform.techtest.server.api.model.DataHeader;
 import com.db.dataplatform.techtest.server.component.Server;
 import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
 import com.db.dataplatform.techtest.server.persistence.model.DataBodyEntity;
@@ -51,10 +52,18 @@ public class ServerImpl implements Server {
   }
 
   @Override
-  public List<DataBody> getAllDataForBlockType(final BlockTypeEnum blockType) {
-    if (blockType != null){
-      return dataBodyServiceImpl.getDataByBlockType(blockType).stream().map(e -> modelMapper.map(e, DataBody.class)).collect(
-              Collectors.toList());
+  public List<DataEnvelope> getAllDataForBlockType(final BlockTypeEnum blockType) {
+
+    if (blockType != null) {
+      return dataBodyServiceImpl.getDataByBlockType(blockType)
+                                .stream()
+                                .map(e -> {
+                                  DataBody dataBody = modelMapper.map(e, DataBody.class);
+                                  DataHeader dataHeader = modelMapper.map(e.getDataHeaderEntity(), DataHeader.class);
+                                  return new DataEnvelope(dataHeader, dataBody);
+                                })
+
+                                .collect(Collectors.toList());
     }
     return emptyList();
   }

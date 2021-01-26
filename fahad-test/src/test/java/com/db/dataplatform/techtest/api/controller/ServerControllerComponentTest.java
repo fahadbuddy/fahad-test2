@@ -22,11 +22,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.db.dataplatform.techtest.Constant.URI_GETDATA;
 import static com.db.dataplatform.techtest.Constant.URI_PUSHDATA;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -57,8 +57,7 @@ public class ServerControllerComponentTest {
     testDataEnvelope = TestDataHelper.createTestDataEnvelopeApiObject();
 
     when(serverMock.saveDataEnvelope(any(DataEnvelope.class))).thenReturn(true);
-    when(serverMock.getAllDataForBlockType(any(BlockTypeEnum.class))).thenReturn(
-            Arrays.asList(new DataBody("TEST", "TEST")));
+    when(serverMock.getAllDataForBlockType(any(BlockTypeEnum.class))).thenReturn(singletonList(testDataEnvelope));
   }
 
   @Test
@@ -84,8 +83,8 @@ public class ServerControllerComponentTest {
                                  .andExpect(status().isOk())
                                  .andReturn();
 
-    List<DataBody> result = objectMapper.readValue(mvcResult.getResponse()
-                                                            .getContentAsString(), new TypeReference<List<DataBody>>() {
+    List<DataEnvelope> result = objectMapper.readValue(mvcResult.getResponse()
+                                                                .getContentAsString(), new TypeReference<List<DataEnvelope>>() {
 
     });
 

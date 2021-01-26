@@ -1,4 +1,4 @@
-package com.db.dataplatform.techtest.server.service.impl;
+package com.db.dataplatform.techtest.integrationtests;
 
 import com.db.dataplatform.techtest.TestDataHelper;
 import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
@@ -6,6 +6,7 @@ import com.db.dataplatform.techtest.server.persistence.model.DataBodyEntity;
 import com.db.dataplatform.techtest.server.persistence.model.DataHeaderEntity;
 import com.db.dataplatform.techtest.server.persistence.repository.DataHeaderRepository;
 import com.db.dataplatform.techtest.server.persistence.repository.DataStoreRepository;
+import com.db.dataplatform.techtest.server.service.impl.DataBodyServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -71,7 +72,7 @@ class DataBodyServiceImplIntegrationTest {
 }
 
 // this is required to prevent spring doing auto scanning all
-// classes. Only required classes are scanned.
+// classes. Only required classes are scanned by the context configuration above.
 @Configuration
 class TestConfiguration{
 

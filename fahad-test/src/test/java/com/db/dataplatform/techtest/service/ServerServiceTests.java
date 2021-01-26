@@ -1,7 +1,9 @@
 package com.db.dataplatform.techtest.service;
 
+import com.db.dataplatform.techtest.server.api.model.DataBody;
 import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.server.mapper.ServerMapperConfiguration;
+import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
 import com.db.dataplatform.techtest.server.persistence.model.DataBodyEntity;
 import com.db.dataplatform.techtest.server.persistence.model.DataHeaderEntity;
 import com.db.dataplatform.techtest.server.service.DataBodyService;
@@ -16,14 +18,17 @@ import org.modelmapper.ModelMapper;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import static com.db.dataplatform.techtest.TestDataHelper.createTestDataEnvelopeApiObject;
 import static com.db.dataplatform.techtest.TestDataHelper.createTestInvalidCheckSumDataEnvelopeApiObject;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ServerServiceTests {
@@ -34,7 +39,7 @@ public class ServerServiceTests {
     private ModelMapper modelMapper;
 
     private DataBodyEntity expectedDataBodyEntity;
-    private DataEnvelope testDataEnvelope;
+    private DataEnvelope expectedDataEnvelope;
 
     private Server server;
 
@@ -43,9 +48,9 @@ public class ServerServiceTests {
         ServerMapperConfiguration serverMapperConfiguration = new ServerMapperConfiguration();
         modelMapper = serverMapperConfiguration.createModelMapperBean();
 
-        testDataEnvelope = createTestDataEnvelopeApiObject();
-        expectedDataBodyEntity = modelMapper.map(testDataEnvelope.getDataBody(), DataBodyEntity.class);
-        expectedDataBodyEntity.setDataHeaderEntity(modelMapper.map(testDataEnvelope.getDataHeader(), DataHeaderEntity.class));
+        expectedDataEnvelope = createTestDataEnvelopeApiObject();
+        expectedDataBodyEntity = modelMapper.map(expectedDataEnvelope.getDataBody(), DataBodyEntity.class);
+        expectedDataBodyEntity.setDataHeaderEntity(modelMapper.map(expectedDataEnvelope.getDataHeader(), DataHeaderEntity.class));
 
         server = new ServerImpl(dataBodyServiceImplMock, modelMapper);
     }
@@ -53,7 +58,7 @@ public class ServerServiceTests {
     @Test
     public void shouldSaveDataEnvelopeAsExpected() throws NoSuchAlgorithmException, IOException {
         // Given/When
-        boolean success = server.saveDataEnvelope(testDataEnvelope);
+        boolean success = server.saveDataEnvelope(expectedDataEnvelope);
 
         // Then
         assertThat(success).isTrue();
@@ -68,6 +73,19 @@ public class ServerServiceTests {
         // Then
         assertThat(success).isFalse();
         verify(dataBodyServiceImplMock, times(0)).saveDataBody(any());
+    }
+
+    @Test
+    public void shouldGetAllDataEnvelopeWhereBlockTypeMatches() throws NoSuchAlgorithmException, IOException {
+        // Given
+        when(dataBodyServiceImplMock.getDataByBlockType(eq(BlockTypeEnum.BLOCKTYPEA))).thenReturn(asList(expectedDataBodyEntity));
+
+        // When
+        List<DataEnvelope> result = server.getAllDataForBlockType(BlockTypeEnum.BLOCKTYPEA);
+
+        // Then
+        assertThat(result).hasSize(1);
+        verify(dataBodyServiceImplMock, times(1)).getDataByBlockType(any());
     }
 
 
