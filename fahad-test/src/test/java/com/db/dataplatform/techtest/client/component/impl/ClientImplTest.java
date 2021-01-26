@@ -135,4 +135,25 @@ class ClientImplTest {
     assertThat(actual.get()).containsOnly(expectedBody);
   }
 
+  @Test
+  void whenBlockTypeNotFoundThenResultEmpty() throws JsonProcessingException {
+
+    // Given
+    DataEnvelope expectedBody = createTestDataEnvelopeApiObject();
+    String expectedJsonDataEnvelopeList = mapper.writeValueAsString(asList(expectedBody));
+
+    mockServer.expect(once(), requestTo(URI_GETDATA.expand(BlockTypeEnum.BLOCKTYPEA)))
+              .andExpect(method(HttpMethod.GET))
+              .andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    // When
+    Optional<List<DataEnvelope>> actual = clientImpl.getData(BlockTypeEnum.BLOCKTYPEA.name());
+
+
+    // Then
+    mockServer.verify();
+    assertThat(actual).isNotPresent();
+
+  }
+
 }

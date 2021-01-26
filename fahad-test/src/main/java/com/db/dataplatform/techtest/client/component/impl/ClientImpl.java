@@ -55,13 +55,17 @@ public class ClientImpl implements Client {
     public Optional<List<DataEnvelope>> getData(String blockType) {
         log.info("Query for data with header block type {}", blockType);
 
-        ResponseEntity<DataEnvelope[]> responseEntity = restTemplate.getForEntity(URI_GETDATA.expand(blockType),
-                                                                             DataEnvelope[].class);
+        try {
+            ResponseEntity<DataEnvelope[]> responseEntity = restTemplate.getForEntity(URI_GETDATA.expand(blockType),
+                                                                                      DataEnvelope[].class);
 
-        if (responseEntity.hasBody()) {
-            return Optional.of(asList(responseEntity.getBody()));
+            if (responseEntity.hasBody()) {
+                return Optional.of(asList(responseEntity.getBody()));
+            }
+
+        } catch (Exception e) {
+             log.error("Exception occurred when querying for header block type {}", blockType);
         }
-
         return Optional.empty();
     }
 
