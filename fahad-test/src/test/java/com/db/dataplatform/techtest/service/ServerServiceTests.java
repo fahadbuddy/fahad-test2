@@ -1,6 +1,5 @@
 package com.db.dataplatform.techtest.service;
 
-import com.db.dataplatform.techtest.server.api.model.DataBody;
 import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.server.mapper.ServerMapperConfiguration;
 import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
@@ -19,11 +18,14 @@ import org.modelmapper.ModelMapper;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Optional;
 
+import static com.db.dataplatform.techtest.TestDataHelper.TEST_NAME;
 import static com.db.dataplatform.techtest.TestDataHelper.createTestDataEnvelopeApiObject;
 import static com.db.dataplatform.techtest.TestDataHelper.createTestInvalidCheckSumDataEnvelopeApiObject;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -88,5 +90,26 @@ public class ServerServiceTests {
         verify(dataBodyServiceImplMock, times(1)).getDataByBlockType(any());
     }
 
+    @Test
+    public void canUpdateBlockTypeWhereBlockNameMatches() throws NoSuchAlgorithmException, IOException {
+        // Given
+        when(dataBodyServiceImplMock.getDataByBlockName(eq(TEST_NAME))).thenReturn(Optional.of(expectedDataBodyEntity));
+
+        // When
+        boolean result = server.updateBlockTypeForBlockName(TEST_NAME, BlockTypeEnum.BLOCKTYPEB.name());
+
+        // Then
+        assertThat(result).isTrue();
+        verify(dataBodyServiceImplMock, times(1)).getDataByBlockName(any());
+        verify(dataBodyServiceImplMock, times(1)).saveDataBody(any());
+    }
+
+    @Test
+    public void throwsExceptionIfBlockTypeInvalid() throws NoSuchAlgorithmException, IOException {
+
+        // When/Then
+        assertThrows(IllegalArgumentException.class, () -> server.updateBlockTypeForBlockName(TEST_NAME, "RANDOM_BLOCKTYPE"));
+
+    }
 
 }

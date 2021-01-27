@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,6 +48,19 @@ public class ServerController {
         List<DataEnvelope> allDataForBlockType = server.getAllDataForBlockType(blockType);
 
         log.info("BlockType queried results: {}", allDataForBlockType.size());
+
+        return ResponseEntity.ok(allDataForBlockType);
+    }
+
+    @PatchMapping(value = "/update/{name}/{newBlockType}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Boolean> updateBlockType(
+            @PathVariable("name") String name,
+            @Valid @PathVariable("newBlockType") BlockTypeEnum newBlockType)  {
+
+        log.info("update request for block name: {} to blockType received: {}", name, newBlockType);
+
+        boolean allDataForBlockType = server.updateBlockTypeForBlockName(name, newBlockType.toString());
+
 
         return ResponseEntity.ok(allDataForBlockType);
     }

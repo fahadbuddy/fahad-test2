@@ -17,7 +17,9 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
+import static com.db.dataplatform.techtest.TestDataHelper.TEST_NAME;
 import static com.db.dataplatform.techtest.TestDataHelper.createTestDataBodyEntity;
 import static com.db.dataplatform.techtest.TestDataHelper.createTestDataHeaderEntity;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,6 +68,42 @@ class DataBodyServiceImplIntegrationTest {
 
     assertThat(dataByBlockTypeA).hasSize(1);
     assertThat(dataByBlockTypeA).containsOnly(expectedDataBodyEntity);
+  }
+
+  @Test
+  void canFilterDataBodyEntityByBlockName() {
+    // Given
+    DataHeaderEntity testDataHeaderEntity = createTestDataHeaderEntity(Instant.now(), BlockTypeEnum.BLOCKTYPEA,
+                                                                       TestDataHelper.TEST_NAME);
+    final DataBodyEntity expectedDataBodyEntity = createTestDataBodyEntity(testDataHeaderEntity);
+
+    DataHeaderEntity testDataHeaderEntity2 = createTestDataHeaderEntity(Instant.now(), BlockTypeEnum.BLOCKTYPEB,
+                                                                        TestDataHelper.TEST_NAME_2);
+    final DataBodyEntity expectedDataBodyEntity2 = createTestDataBodyEntity(testDataHeaderEntity2);
+
+    // When
+    dataStoreRepository.save(expectedDataBodyEntity);
+    dataStoreRepository.save(expectedDataBodyEntity2);
+
+    // Then
+    assertThat(dataStoreRepository.findAll()).hasSize(2);
+    assertThat(dataHeaderRepository.findAll()).hasSize(2);
+
+
+    // When query by BlockName
+    DataBodyServiceImpl service = new DataBodyServiceImpl(dataStoreRepository);
+
+    Optional<DataBodyEntity> dataByBlockName = service.getDataByBlockName(TEST_NAME);
+
+    assertThat(dataByBlockName).isPresent();
+    assertThat(dataByBlockName.get()).isEqualTo(expectedDataBodyEntity);
+
+    // When query by non-existing block name, then empty
+
+    dataByBlockName = service.getDataByBlockName("RANDOM");
+
+    assertThat(dataByBlockName).isEmpty();
+
   }
 
 

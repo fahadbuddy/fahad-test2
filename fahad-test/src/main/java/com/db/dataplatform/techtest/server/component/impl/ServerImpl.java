@@ -14,10 +14,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
+import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
+import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
 @Service
@@ -33,6 +37,7 @@ public class ServerImpl implements Server {
    * @return true if there is a match with the client provided checksum.
    */
   @Override
+  @Transactional
   public boolean saveDataEnvelope(DataEnvelope envelope) {
 
     String toCheck = MD5Utils.createCheckSum(envelope.getDataBody()
@@ -66,6 +71,34 @@ public class ServerImpl implements Server {
                                 .collect(Collectors.toList());
     }
     return emptyList();
+  }
+
+  @Override
+  @Transactional
+  public boolean updateBlockTypeForBlockName(final String blockName, final String newBlockType) {
+
+    Optional<BlockTypeEnum> newBlockTypeEnum = parseBlockTypeString(newBlockType);
+
+    if (!hasText(blockName) || !newBlockTypeEnum.isPresent()) throw new IllegalArgumentException("invalid blockname and/or blocktype");
+
+    Optional<DataBodyEntity> dataByBlockName = dataBodyServiceImpl.getDataByBlockName(blockName);
+
+    log.info("updating blockname: {} with the new blockType: {}", blockName, newBlockType);
+
+    return dataByBlockName.map(e -> {
+      // update the blockType
+      e.getDataHeaderEntity().setBlockType(newBlockTypeEnum.get());
+      dataBodyServiceImpl.saveDataBody(e);
+      return true;
+    }).orElse(false);
+
+  }
+
+  private Optional<BlockTypeEnum> parseBlockTypeString(final String blockType) {
+      if (hasText(blockType))
+        return Optional.ofNullable(BlockTypeEnum.valueOf(blockType));
+
+    return Optional.empty();
   }
 
   private void persist(DataEnvelope envelope) {

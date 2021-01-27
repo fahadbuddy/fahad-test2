@@ -15,7 +15,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
+import static com.db.dataplatform.techtest.TestDataHelper.TEST_NAME;
 import static com.db.dataplatform.techtest.TestDataHelper.createTestDataBodyEntity;
 import static com.db.dataplatform.techtest.TestDataHelper.createTestDataHeaderEntity;
 import static java.util.Arrays.asList;
@@ -65,6 +67,18 @@ public class DataBodyServiceTests {
 
         // Then
         verify(dataStoreRepositoryMock, times(1)).findByDataHeaderEntityBlockType(BlockTypeEnum.BLOCKTYPEA);
+    }
+
+    @Test
+    public void canGetDataBodyEntityForAGivenBlockName(){
+        // Given
+        when(dataStoreRepositoryMock.findByDataHeaderEntityName(any())).thenReturn(Optional.of(expectedDataBodyEntity));
+
+        // When
+        dataBodyService.getDataByBlockName(TEST_NAME);
+
+        // Then
+        verify(dataStoreRepositoryMock, times(1)).findByDataHeaderEntityName(TEST_NAME);
     }
 
 }
