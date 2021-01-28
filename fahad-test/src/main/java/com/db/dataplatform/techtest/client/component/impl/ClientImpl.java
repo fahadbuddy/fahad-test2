@@ -11,13 +11,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 import static com.db.dataplatform.techtest.Constant.URI_GETDATA;
 import static com.db.dataplatform.techtest.Constant.URI_PATCHDATA;
@@ -45,31 +44,46 @@ public class ClientImpl implements Client {
     }
 
     @Override
+    @Retryable
     public void pushData(@Valid DataEnvelope dataEnvelope) {
         log.info("Pushing data {} to {}", dataEnvelope.getDataHeader().getName(), URI_PUSHDATA);
 
         HttpEntity<DataEnvelope> body = new HttpEntity<>(dataEnvelope, createHttpHeaders());
 
-        restTemplate.postForLocation(URI_PUSHDATA, body);
+        ResponseEntity<Void> exchange = null;
+        try {
+            exchange = restTemplate.exchange(URI_PUSHDATA, HttpMethod.POST,
+                                             body, Void.class);
+
+            if (exchange.getStatusCode().is2xxSuccessful()) {
+                log.info("Successfully pushed data {} to {}", dataEnvelope.getDataHeader().getName(), URI_PUSHDATA);
+            }
+        }
+        catch (Exception e) {
+            log.error("Error occurred when pushing data {} to {}", dataEnvelope.getDataHeader().getName(), URI_PUSHDATA, e);
+            throw e;
+        }
 
     }
 
     @Override
-    public Optional<List<DataEnvelope>> getData(String blockType) {
+    public List<DataEnvelope> getData(String blockType) {
         log.info("Query for data with header block type {}", blockType);
 
+        ResponseEntity<DataEnvelope[]> exchange = null;
         try {
-            ResponseEntity<DataEnvelope[]> responseEntity = restTemplate.getForEntity(URI_GETDATA.expand(blockType),
-                                                                                      DataEnvelope[].class);
+            exchange = restTemplate.exchange(URI_GETDATA.expand(blockType), HttpMethod.GET, new HttpEntity(createHttpHeaders()), DataEnvelope[].class);
 
-            if (responseEntity.hasBody()) {
-                return Optional.of(asList(responseEntity.getBody()));
+            if (exchange.getStatusCode().is2xxSuccessful() && exchange.hasBody()) {
+                log.info("Succesfully queried for data with header block type {}", blockType);
+                return asList(exchange.getBody());
             }
-
-        } catch (Exception e) {
-             log.error("Exception occurred when querying for header block type {}", blockType);
         }
-        return Optional.empty();
+        catch (Exception e) {
+            log.info("Got exception when querying for data with header block type {}", blockType);
+            throw e;
+        }
+        return null;
     }
 
     @Override

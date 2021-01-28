@@ -10,9 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface Client {
-    @Retryable
     void pushData(DataEnvelope dataEnvelope) throws JsonProcessingException;
-    // Use Optional on return values, to avoid doing null checks.
-    Optional<List<DataEnvelope>> getData(String blockType);
+    List<DataEnvelope> getData(String blockType);
     boolean updateData(String blockName, String newBlockType) throws UnsupportedEncodingException;
 }

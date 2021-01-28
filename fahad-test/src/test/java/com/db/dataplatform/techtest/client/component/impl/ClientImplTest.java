@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
@@ -130,17 +131,16 @@ class ClientImplTest {
                       MediaType.APPLICATION_JSON));
 
     // When
-    Optional<List<DataEnvelope>> actual = clientImpl.getData(BlockTypeEnum.BLOCKTYPEA.name());
+    List<DataEnvelope> actual = clientImpl.getData(BlockTypeEnum.BLOCKTYPEA.name());
 
 
     // Then
     mockServer.verify();
-    assertThat(actual).isPresent();
-    assertThat(actual.get()).containsOnly(expectedBody);
+    assertThat(actual).containsOnly(expectedBody);
   }
 
   @Test
-  void whenBlockTypeNotFoundThenResultEmpty() throws JsonProcessingException {
+  void whenGetBlockTypeNotFoundThenResultEmpty() throws JsonProcessingException {
 
     // Given
     DataEnvelope expectedBody = createTestDataEnvelopeApiObject();
@@ -150,12 +150,7 @@ class ClientImplTest {
               .andRespond(withStatus(HttpStatus.NOT_FOUND));
 
     // When
-    Optional<List<DataEnvelope>> actual = clientImpl.getData(BlockTypeEnum.BLOCKTYPEA.name());
-
-
-    // Then
-    mockServer.verify();
-    assertThat(actual).isNotPresent();
+    assertThrows(HttpClientErrorException.class, () -> clientImpl.getData(BlockTypeEnum.BLOCKTYPEA.name()));
 
   }
 

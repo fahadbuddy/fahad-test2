@@ -50,7 +50,7 @@ public class TechTestApplication {
 
 	private void queryData() {
 
-		Optional<List<DataEnvelope>> data = client.getData(BlockTypeEnum.BLOCKTYPEA.name());
+		List<DataEnvelope> data = client.getData(BlockTypeEnum.BLOCKTYPEA.name());
 
 	}
 
