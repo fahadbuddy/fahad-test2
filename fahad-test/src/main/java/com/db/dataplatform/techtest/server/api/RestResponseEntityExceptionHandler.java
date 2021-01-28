@@ -15,7 +15,7 @@ public class RestResponseEntityExceptionHandler
         extends ResponseEntityExceptionHandler {
 
 
-    @ExceptionHandler(value = {ConstraintViolationException.class})
+    @ExceptionHandler(value = {ConstraintViolationException.class, IllegalArgumentException.class})
     protected ResponseEntity<Object> handleConflict(Exception ex, WebRequest request) {
 
         String bodyOfResponse = "Provided input parameters have not met validation requirements";

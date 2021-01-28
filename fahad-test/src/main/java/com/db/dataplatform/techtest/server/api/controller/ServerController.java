@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,7 +55,7 @@ public class ServerController {
 
     @PatchMapping(value = "/update/{name}/{newBlockType}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Boolean> updateBlockType(
-            @PathVariable("name") String name,
+            @Valid @NonNull  @PathVariable("name") String name,
             @Valid @PathVariable("newBlockType") BlockTypeEnum newBlockType)  {
 
         log.info("update request for block name: {} to blockType received: {}", name, newBlockType);

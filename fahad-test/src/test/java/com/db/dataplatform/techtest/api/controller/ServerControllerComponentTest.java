@@ -117,4 +117,32 @@ public class ServerControllerComponentTest {
     assertThat(result).isTrue();
   }
 
+  @Test
+  public void testUpdateBlockTypeInvalidBlockName() throws Exception {
+
+    // Given
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.patch(URI_PATCHDATA.expand("RANDOM_NAME", BLOCKTYPEB))
+                                                                .accept(MediaType.APPLICATION_JSON))
+                                 .andExpect(status().isOk())
+                                 .andReturn();
+
+    // When
+    Boolean result = objectMapper.readValue(mvcResult.getResponse()
+                                                     .getContentAsString(), Boolean.class);
+
+    // Then
+    assertThat(result).isNotNull();
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  public void testUpdateBlockTypeInvalidBlockType() throws Exception {
+
+    // Given
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.patch(URI_PATCHDATA.expand(TEST_NAME, "INVALID_BLOCKTYPE"))
+                                                                .accept(MediaType.APPLICATION_JSON))
+                                 .andExpect(status().is4xxClientError())
+                                 .andReturn();
+
+  }
 }

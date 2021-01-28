@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
@@ -79,8 +78,6 @@ public class ServerImpl implements Server {
 
     Optional<BlockTypeEnum> newBlockTypeEnum = parseBlockTypeString(newBlockType);
 
-    if (!hasText(blockName) || !newBlockTypeEnum.isPresent()) throw new IllegalArgumentException("invalid blockname and/or blocktype");
-
     Optional<DataBodyEntity> dataByBlockName = dataBodyServiceImpl.getDataByBlockName(blockName);
 
     log.info("updating blockname: {} with the new blockType: {}", blockName, newBlockType);
@@ -90,7 +87,7 @@ public class ServerImpl implements Server {
       e.getDataHeaderEntity().setBlockType(newBlockTypeEnum.get());
       dataBodyServiceImpl.saveDataBody(e);
       return true;
-    }).orElse(false);
+    }).orElseThrow(() -> new IllegalArgumentException("No BlockName found for: " + blockName));
 
   }
 
