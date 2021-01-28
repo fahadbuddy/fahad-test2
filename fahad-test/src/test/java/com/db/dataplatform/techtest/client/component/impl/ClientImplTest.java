@@ -18,11 +18,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Optional;
 
 import static com.db.dataplatform.techtest.Constant.URI_GETDATA;
+import static com.db.dataplatform.techtest.Constant.URI_PATCHDATA;
 import static com.db.dataplatform.techtest.Constant.URI_PUSHDATA;
+import static com.db.dataplatform.techtest.client.component.impl.TestDataHelperClient.TEST_NAME;
 import static com.db.dataplatform.techtest.client.component.impl.TestDataHelperClient.createInvalidTestDataEnvelopeApiObject;
 import static com.db.dataplatform.techtest.client.component.impl.TestDataHelperClient.createTestDataEnvelopeApiObject;
 import static java.util.Arrays.asList;
@@ -31,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -140,7 +144,6 @@ class ClientImplTest {
 
     // Given
     DataEnvelope expectedBody = createTestDataEnvelopeApiObject();
-    String expectedJsonDataEnvelopeList = mapper.writeValueAsString(asList(expectedBody));
 
     mockServer.expect(once(), requestTo(URI_GETDATA.expand(BlockTypeEnum.BLOCKTYPEA)))
               .andExpect(method(HttpMethod.GET))
@@ -154,6 +157,44 @@ class ClientImplTest {
     mockServer.verify();
     assertThat(actual).isNotPresent();
 
+  }
+
+  @Test
+  void canPatchBlockTypeForAnExistingBlockByBlockName() throws JsonProcessingException, UnsupportedEncodingException {
+
+    // Given
+
+    DataEnvelope expectedBody = createTestDataEnvelopeApiObject();
+
+    mockServer.expect(once(), requestTo(URI_PATCHDATA.expand(TEST_NAME, BlockTypeEnum.BLOCKTYPEB)))
+              .andRespond(withSuccess("true", MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON));
+
+    // When
+    boolean actual = clientImpl.updateData(TEST_NAME, BlockTypeEnum.BLOCKTYPEB.name());
+
+
+    // Then
+    mockServer.verify();
+    assertThat(actual).isTrue();
+  }
+
+  @Test
+  void patchBlockTypeForAnInvalidBlockName() throws  UnsupportedEncodingException {
+
+    // Given
+
+    DataEnvelope expectedBody = createTestDataEnvelopeApiObject();
+
+    mockServer.expect(once(), requestTo(URI_PATCHDATA.expand("RANDOM_NAME", BlockTypeEnum.BLOCKTYPEB)))
+              .andRespond(withBadRequest().contentType(MediaType.APPLICATION_JSON));
+
+    // When
+    boolean actual = clientImpl.updateData("RANDOM_NAME", BlockTypeEnum.BLOCKTYPEB.name());
+
+
+    // Then
+    mockServer.verify();
+    assertThat(actual).isFalse();
   }
 
 }

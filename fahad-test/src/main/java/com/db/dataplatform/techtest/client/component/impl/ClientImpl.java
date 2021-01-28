@@ -7,10 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.db.dataplatform.techtest.Constant.URI_GETDATA;
+import static com.db.dataplatform.techtest.Constant.URI_PATCHDATA;
 import static com.db.dataplatform.techtest.Constant.URI_PUSHDATA;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -71,8 +74,23 @@ public class ClientImpl implements Client {
 
     @Override
     public boolean updateData(String blockName, String newBlockType) {
-        log.info("Updating blocktype to {} for block with name {}", newBlockType, blockName);
-        return true;
+        log.info("Updating blockName {} to blocktype {}", blockName, newBlockType);
+
+        ResponseEntity<Boolean> exchange = null;
+        try {
+            exchange = restTemplate.exchange(URI_PATCHDATA.expand(blockName, newBlockType), HttpMethod.PATCH,
+                                             new HttpEntity(createHttpHeaders()), Boolean.class);
+
+            if (exchange.getStatusCode().is2xxSuccessful() && exchange.getBody()) {
+                log.info("Successfully updated blockName {} to blocktype {}", blockName, newBlockType);
+                return true;
+            }
+        }
+        catch (Exception e) {
+            log.error("Exception occurred when updating blockname {}", blockName, e);
+        }
+
+        return false;
     }
 
     private HttpHeaders createHttpHeaders() {
