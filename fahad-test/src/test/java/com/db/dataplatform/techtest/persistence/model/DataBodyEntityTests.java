@@ -27,6 +27,7 @@ public class DataBodyEntityTests {
         DataBodyEntity dataBodyEntity = createTestDataBodyEntity(dataHeaderEntity);
 
         assertThat(dataBodyEntity.getDataHeaderEntity()).isNotNull();
+        assertThat(dataBodyEntity.getDataHeaderEntity().getCreatedTimestamp()).isEqualTo(expectedTimestamp);
         assertThat(dataBodyEntity.getDataBody()).isNotNull();
     }
 
