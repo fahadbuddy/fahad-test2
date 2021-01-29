@@ -5,22 +5,23 @@ import com.db.dataplatform.techtest.client.api.model.DataBody;
 import com.db.dataplatform.techtest.client.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.client.api.model.DataHeader;
 import com.db.dataplatform.techtest.client.component.Client;
-
+import com.db.dataplatform.techtest.config.ApplicationConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.event.EventListener;
 import org.springframework.retry.annotation.EnableRetry;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.Optional;
 
 import static com.db.dataplatform.techtest.Constant.DUMMY_DATA;
 
 @SpringBootApplication
+@Import(ApplicationConfig.class)
 @EnableRetry
 public class TechTestApplication {
 

@@ -1,6 +1,7 @@
 package com.db.dataplatform.techtest.server.component.impl;
 
 import com.db.dataplatform.techtest.server.component.HadoopClient;
+import com.db.dataplatform.techtest.server.exception.HadoopClientException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class HadoopClientImpl implements HadoopClient {
 
   @Override
   @Retryable(maxAttempts = 3 )
-  public boolean persistToDataLake(final String payload) {
+  public boolean persistToDataLake(final String payload) throws HadoopClientException {
 
     log.info("Pushing payload {} to {}", payload, URI_POSTDATA_HADOOP);
 
@@ -48,14 +49,15 @@ public class HadoopClientImpl implements HadoopClient {
       if (exchange.getStatusCode().is2xxSuccessful()) {
         log.info("Successfully posted data to {}", URI_POSTDATA_HADOOP);
         return true;
+      } else {
+        log.error("Error while posting data to {}, statusCode: ", URI_POSTDATA_HADOOP, exchange.getStatusCode());
+        return false;
       }
     }
     catch (Exception e) {
-      log.error("Error occurred when pushing data {} to {}", payload,  URI_POSTDATA_HADOOP, e);
-      throw e;
+      throw new HadoopClientException("Error occurred when posting data to " + URI_POSTDATA_HADOOP, e);
     }
 
-    return false;
   }
 
   private HttpHeaders createHttpHeaders() {

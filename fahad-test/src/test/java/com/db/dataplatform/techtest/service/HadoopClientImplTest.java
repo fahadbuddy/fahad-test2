@@ -3,6 +3,7 @@ package com.db.dataplatform.techtest.service;
 import com.db.dataplatform.techtest.client.config.RestTemplateConfiguration;
 import com.db.dataplatform.techtest.server.component.HadoopClient;
 import com.db.dataplatform.techtest.server.component.impl.HadoopClientImpl;
+import com.db.dataplatform.techtest.server.exception.HadoopClientException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +20,10 @@ import org.springframework.web.client.RestTemplate;
 
 import static com.db.dataplatform.techtest.Constant.URI_POSTDATA_HADOOP;
 import static com.db.dataplatform.techtest.client.component.impl.TestDataHelperClient.createTestDataEnvelopeApiObject;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.client.ExpectedCount.once;
+import static org.springframework.test.web.client.ExpectedCount.times;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
@@ -44,7 +48,7 @@ class HadoopClientImplTest {
   }
 
   @Test
-  void canPushDataToServer() throws JsonProcessingException {
+  void canPushDataToServer() throws JsonProcessingException, HadoopClientException {
 
     // Given
     String expectedUri = URI_POSTDATA_HADOOP;
@@ -57,14 +61,15 @@ class HadoopClientImplTest {
                                                    .body(jsonPayload));
 
     // When
-    clientImpl.persistToDataLake(jsonPayload);
+    boolean status = clientImpl.persistToDataLake(jsonPayload);
 
     // Then
     mockServer.verify();
+    assertThat(status).isTrue();
   }
 
   @Test
-  void retriesIfServerUnavailable() throws JsonProcessingException {
+  void retriesIfServerUnavailable() throws JsonProcessingException, HadoopClientException {
 
     // Given
     String expectedUri = URI_POSTDATA_HADOOP;
@@ -83,10 +88,30 @@ class HadoopClientImplTest {
                                                    .body(jsonPayload));
 
     // When
-    clientImpl.persistToDataLake(jsonPayload);
+    boolean status = clientImpl.persistToDataLake(jsonPayload);
 
     // Then
     mockServer.verify();
+    assertThat(status).isTrue();
+  }
+
+  @Test
+  void whenServiceDown() throws JsonProcessingException {
+
+    // Given
+    String expectedUri = URI_POSTDATA_HADOOP;
+
+    String jsonPayload = mapper.writeValueAsString(createTestDataEnvelopeApiObject());
+
+    // first time server is unavailable
+    mockServer.expect(times(3), requestTo(expectedUri))
+              .andExpect(method(HttpMethod.POST))
+              .andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+
+
+    // When
+    assertThrows(HadoopClientException.class, () ->clientImpl.persistToDataLake(jsonPayload));
+
   }
 
 }
