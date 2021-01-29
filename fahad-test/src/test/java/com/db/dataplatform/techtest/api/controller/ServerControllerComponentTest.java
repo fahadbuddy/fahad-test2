@@ -1,6 +1,7 @@
 package com.db.dataplatform.techtest.api.controller;
 
 import com.db.dataplatform.techtest.TestDataHelper;
+import com.db.dataplatform.techtest.server.api.RestResponseEntityExceptionHandler;
 import com.db.dataplatform.techtest.server.api.controller.ServerController;
 import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.server.component.Server;
@@ -53,7 +54,8 @@ public class ServerControllerComponentTest {
   public void setUp() throws HadoopClientException, NoSuchAlgorithmException, IOException {
 
     serverController = new ServerController(serverMock);
-    mockMvc = standaloneSetup(serverController).build();
+    mockMvc = standaloneSetup(serverController).setControllerAdvice(new RestResponseEntityExceptionHandler())
+                                               .build();
     objectMapper = Jackson2ObjectMapperBuilder.json()
                                               .build();
 
@@ -91,9 +93,10 @@ public class ServerControllerComponentTest {
 
     // When
     List<DataEnvelope> result = objectMapper.readValue(mvcResult.getResponse()
-                                                                .getContentAsString(), new TypeReference<List<DataEnvelope>>() {
+                                                                .getContentAsString(),
+                                                       new TypeReference<List<DataEnvelope>>() {
 
-    });
+                                                       });
 
     // Then
     assertThat(result).hasSize(1);
@@ -139,8 +142,9 @@ public class ServerControllerComponentTest {
   public void testUpdateBlockTypeInvalidBlockType() throws Exception {
 
     // Given
-    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.patch(URI_PATCHDATA.expand(TEST_NAME, "INVALID_BLOCKTYPE"))
-                                                                .accept(MediaType.APPLICATION_JSON))
+    MvcResult mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.patch(URI_PATCHDATA.expand(TEST_NAME, "INVALID_BLOCKTYPE"))
+                                  .accept(MediaType.APPLICATION_JSON))
                                  .andExpect(status().is4xxClientError())
                                  .andReturn();
 
