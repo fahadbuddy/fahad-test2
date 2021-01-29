@@ -21,7 +21,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.Optional;
 
 import static com.db.dataplatform.techtest.Constant.URI_GETDATA;
 import static com.db.dataplatform.techtest.Constant.URI_PATCHDATA;

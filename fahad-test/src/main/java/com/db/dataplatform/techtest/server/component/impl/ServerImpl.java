@@ -50,6 +50,7 @@ public class ServerImpl implements Server {
     // Save to persistence.
     persist(envelope);
 
+
     log.info("Data persisted successfully, data name: {}", envelope.getDataHeader()
                                                                    .getName());
     return true;
