@@ -3,13 +3,16 @@ package com.db.dataplatform.techtest.server.component.impl;
 import com.db.dataplatform.techtest.server.api.model.DataBody;
 import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.server.api.model.DataHeader;
+import com.db.dataplatform.techtest.server.component.HadoopClient;
 import com.db.dataplatform.techtest.server.component.Server;
 import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
 import com.db.dataplatform.techtest.server.persistence.model.DataBodyEntity;
 import com.db.dataplatform.techtest.server.persistence.model.DataHeaderEntity;
 import com.db.dataplatform.techtest.server.service.DataBodyService;
 import com.db.dataplatform.techtest.util.MD5Utils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,8 @@ public class ServerImpl implements Server {
 
   private final DataBodyService dataBodyServiceImpl;
   private final ModelMapper modelMapper;
+  private final HadoopClient hadoopClientImpl;
+  private final ObjectMapper mapper;
 
   /**
    * @param envelope
@@ -37,6 +42,7 @@ public class ServerImpl implements Server {
    */
   @Override
   @Transactional
+  @SneakyThrows
   public boolean saveDataEnvelope(DataEnvelope envelope) {
 
     String toCheck = MD5Utils.createCheckSum(envelope.getDataBody()
@@ -48,8 +54,9 @@ public class ServerImpl implements Server {
     if (!isValidChecksum) return false;
 
     // Save to persistence.
-    persist(envelope);
 
+    persist(envelope);
+    hadoopClientImpl.persistToDataLake(mapper.writeValueAsString(envelope));
 
     log.info("Data persisted successfully, data name: {}", envelope.getDataHeader()
                                                                    .getName());
@@ -85,16 +92,18 @@ public class ServerImpl implements Server {
 
     return dataByBlockName.map(e -> {
       // update the blockType
-      e.getDataHeaderEntity().setBlockType(newBlockTypeEnum.get());
+      e.getDataHeaderEntity()
+       .setBlockType(newBlockTypeEnum.get());
       dataBodyServiceImpl.saveDataBody(e);
       return true;
-    }).orElseThrow(() -> new IllegalArgumentException("No BlockName found for: " + blockName));
+    })
+                          .orElseThrow(() -> new IllegalArgumentException("No BlockName found for: " + blockName));
 
   }
 
   private Optional<BlockTypeEnum> parseBlockTypeString(final String blockType) {
-      if (hasText(blockType))
-        return Optional.ofNullable(BlockTypeEnum.valueOf(blockType));
+
+    if (hasText(blockType)) return Optional.ofNullable(BlockTypeEnum.valueOf(blockType));
 
     return Optional.empty();
   }

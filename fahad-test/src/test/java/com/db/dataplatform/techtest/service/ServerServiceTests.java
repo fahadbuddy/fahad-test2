@@ -1,19 +1,23 @@
 package com.db.dataplatform.techtest.service;
 
 import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
+import com.db.dataplatform.techtest.server.component.HadoopClient;
+import com.db.dataplatform.techtest.server.component.Server;
+import com.db.dataplatform.techtest.server.component.impl.ServerImpl;
+import com.db.dataplatform.techtest.server.exception.HadoopClientException;
 import com.db.dataplatform.techtest.server.mapper.ServerMapperConfiguration;
 import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
 import com.db.dataplatform.techtest.server.persistence.model.DataBodyEntity;
 import com.db.dataplatform.techtest.server.persistence.model.DataHeaderEntity;
 import com.db.dataplatform.techtest.server.service.DataBodyService;
-import com.db.dataplatform.techtest.server.component.Server;
-import com.db.dataplatform.techtest.server.component.impl.ServerImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -40,21 +44,31 @@ public class ServerServiceTests {
 
     private ModelMapper modelMapper;
 
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private HadoopClient client;
+
+    @Mock
+    private RestTemplate restTemplate;
+
     private DataBodyEntity expectedDataBodyEntity;
     private DataEnvelope expectedDataEnvelope;
 
     private Server server;
 
     @Before
-    public void setup() {
+    public void setup() throws HadoopClientException {
         ServerMapperConfiguration serverMapperConfiguration = new ServerMapperConfiguration();
         modelMapper = serverMapperConfiguration.createModelMapperBean();
-
+        objectMapper = new ObjectMapper();
         expectedDataEnvelope = createTestDataEnvelopeApiObject();
         expectedDataBodyEntity = modelMapper.map(expectedDataEnvelope.getDataBody(), DataBodyEntity.class);
         expectedDataBodyEntity.setDataHeaderEntity(modelMapper.map(expectedDataEnvelope.getDataHeader(), DataHeaderEntity.class));
 
-        server = new ServerImpl(dataBodyServiceImplMock, modelMapper);
+        when(client.persistToDataLake(any())).thenReturn(true);
+
+        server = new ServerImpl(dataBodyServiceImplMock, modelMapper, client, objectMapper);
     }
 
     @Test
